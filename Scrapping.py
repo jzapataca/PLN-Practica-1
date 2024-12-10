@@ -16,7 +16,7 @@ while len(reviews) < 200:
 
 reviews_text = [review.text for review in reviews]
 
-with open("./data/reviews.txt", "w", encoding="utf-8") as file:
+with open("./data/raw/reviews.txt", "w", encoding="utf-8") as file:
     for review in reviews_text:
         file.write(review + "\n")
 
