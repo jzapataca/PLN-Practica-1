@@ -25,8 +25,8 @@ def calculate_metrics(file_paths):
         print()
 
 file_paths = [
-    "./data/pos/tweets.txt",
-    "./data/neg/tweets.txt"
+    "./data/interim/pos/tweets.txt",
+    "./data/interim/neg/tweets.txt"
 ]
 
 calculate_metrics(file_paths)

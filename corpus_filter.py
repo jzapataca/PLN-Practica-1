@@ -8,7 +8,7 @@ def read_xml(file_path):
     root = tree.getroot()
     return root
 
-file_path = "./data/corpus/general-train-tagged-3l.xml"
+file_path = "./data/raw/corpus/general-train-tagged-3l.xml"
 root = read_xml(file_path)
 
 def filter_tweets(root):
@@ -39,7 +39,7 @@ def save_tweets(tweets, folder):
 
 selected_positive, selected_negative = filter_tweets(root)
 
-save_tweets(selected_positive, "./data/pos")
-save_tweets(selected_negative, "./data/neg")
+save_tweets(selected_positive, "./data/interim/pos")
+save_tweets(selected_negative, "./data/interim/neg")
 
 print("Filtered and saved tweets successfully.")
