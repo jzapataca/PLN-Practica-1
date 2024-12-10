@@ -15,7 +15,9 @@ while len(reviews) < 200:
     reviews = driver.find_elements(By.CLASS_NAME, "apphub_CardTextContent")
 
 reviews_text = [review.text for review in reviews]
-df_reviews = pd.DataFrame(reviews_text, columns=['Reviews'])
-df_reviews.to_csv("./data/reviews.csv", index=False, header=False)
+
+with open("./data/reviews.txt", "w", encoding="utf-8") as file:
+    for review in reviews_text:
+        file.write(review + "\n")
 
 driver.quit()
