@@ -1,5 +1,6 @@
+import pickle
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-
+import numpy as np
 
 def calculate_to(corpus):
     """
@@ -9,7 +10,7 @@ def calculate_to(corpus):
     to_matrix = vectorizer.fit_transform([' '.join(tokens) for tokens in corpus])
     feature_names = vectorizer.get_feature_names_out()
     
-    return to_matrix, feature_names
+    return to_matrix, feature_names, vectorizer
 
 def calculate_tfidf(corpus):
     """
@@ -19,24 +20,35 @@ def calculate_tfidf(corpus):
     tfidf_matrix = vectorizer.fit_transform([' '.join(tokens) for tokens in corpus])
     feature_names = vectorizer.get_feature_names_out()
     
-    return tfidf_matrix, feature_names
+    return tfidf_matrix, feature_names, vectorizer
 
-if __name__ == '__main__':
-
+def calculate_ponderation():
+    """
+    Calcula la frecuencia absoluta (TO) y la ponderación TF-IDF de las características para el corpus
+    del momento en el que se ejecute la función. Además Guarda las matrices y los objetos vectorizer en archivos.
+    """
     # Cargar el corpus
     with open("data/processed/general_corpus.txt", "r", encoding="utf-8") as file:
         corpus = [line.strip().split() for line in file]
 
     # Calcular la frecuencia absoluta (TO)
-    to_matrix, feature_names = calculate_to(corpus)
+    to_matrix, to_feature_names, to_vectorizer = calculate_to(corpus)
 
     # Calcular la ponderación TF-IDF
-    tfidf_matrix, feature_names = calculate_tfidf(corpus)
+    tfidf_matrix, tfidf_feature_names, tfidf_vectorizer = calculate_tfidf(corpus)
 
-    print("Matriz de frecuencia absoluta (TO):")
-    print(to_matrix)
+    # Guardar las matrices y los nombres de las características
+    np.save("data/processed/ponderation/to_matrix.npy", to_matrix.toarray())
+    np.save("data/processed/ponderation/to_feature_names.npy", to_feature_names)
 
-    print("Matriz de ponderación TF-IDF:")
-    print(tfidf_matrix)
+    np.save("data/processed/ponderation/tfidf_matrix.npy", tfidf_matrix.toarray())
+    np.save("data/processed/ponderation/tfidf_feature_names.npy", tfidf_feature_names)
 
-    
+    # Guardar los objetos vectorizer
+    with open("data/processed/ponderation/to_vectorizer.pkl", "wb") as file:
+        pickle.dump(to_vectorizer, file)
+
+    with open("data/processed/ponderation/tfidf_vectorizer.pkl", "wb") as file:
+        pickle.dump(tfidf_vectorizer, file)
+
+    print("Matrices y objetos vectorizer guardados exitosamente.")

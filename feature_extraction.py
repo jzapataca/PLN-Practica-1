@@ -77,26 +77,30 @@ def apply_stemming(tokenized_corpus, language='spanish'):
     
     return stemmed_corpus
 
-def main(corpus):
+def feature_extraction(corpus, if_remove_stopwords=True, if_apply_stemming=True):
     """
     Función principal que ejecuta todo el flujo de procesamiento.
     """
     # Paso 1: Tokenización en unigramas y bigramas
-    tokenized_corpus = tokenize_text(corpus)
+    final_corpus = tokenize_text(corpus)
     
-    # Paso 2: Eliminación de stopwords
-    no_stopwords_corpus = remove_stopwords(tokenized_corpus)
+    if if_remove_stopwords:
+        # Paso 2: Eliminación de stopwords
+        final_corpus = remove_stopwords(final_corpus)
     
     # Paso 3: Eliminación de tokens con baja frecuencia
-    filtered_corpus = remove_low_frequency_tokens(no_stopwords_corpus)
+    final_corpus = remove_low_frequency_tokens(final_corpus)
     
-    # Paso 4: Normalización mediante stemming
-    normalized_corpus = apply_stemming(filtered_corpus)
+    if if_apply_stemming:
+        # Paso 4: Normalización mediante stemming
+        final_corpus = apply_stemming(final_corpus)
     
-    return normalized_corpus
+    return final_corpus
 
-if __name__ == "__main__":
-
+def feature_extraction_execution(remove_stopwords=True, apply_stemming=True):
+    """
+    Función que ejecuta el flujo de procesamiento desde un archivo.
+    """
     tweet_files = [
         "data/processed/neg/tweets.txt",
         "data/processed/pos/tweets.txt",
@@ -113,17 +117,26 @@ if __name__ == "__main__":
         with open(file, "r", encoding="utf-8") as f:
             corpus = f.read().split("\n")[:-1]
         
-        processed_corpus = main(corpus)
+        processed_corpus = feature_extraction(corpus, remove_stopwords, apply_stemming)
         general_corpus.extend(processed_corpus)
 
     for file in review_files:
         with open(file, "r", encoding="utf-8") as f:
             corpus = f.read().split("\n---------------\n")[:-1]
         
-        processed_corpus = main(corpus)
+        processed_corpus = feature_extraction(corpus, remove_stopwords, apply_stemming)
         general_corpus.extend(processed_corpus)
 
     # Guardar el corpus procesado
     with open("data/processed/general_corpus.txt", "w", encoding="utf-8") as f:
         for line in general_corpus:
             f.write(" ".join(line) + "\n")
+
+
+if __name__ == '__main__':
+    feature_extraction_execution()
+    print("Procesamiento de texto final")
+    import time
+    time.sleep(20)
+    feature_extraction_execution(remove_stopwords=False, apply_stemming=False)
+    print("Procesamiento de texto final")
