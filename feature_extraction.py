@@ -97,46 +97,49 @@ def feature_extraction(corpus, if_remove_stopwords=True, if_apply_stemming=True)
     
     return final_corpus
 
+import pandas as pd
+
 def feature_extraction_execution(remove_stopwords=True, apply_stemming=True):
     """
-    Función que ejecuta el flujo de procesamiento desde un archivo.
+    Función que ejecuta el flujo de procesamiento desde un archivo y guarda el resultado en un CSV.
     """
     tweet_files = [
-        "data/processed/neg/tweets.txt",
-        "data/processed/pos/tweets.txt",
+        ("data/processed/neg/tweets.txt", "negative"),
+        ("data/processed/pos/tweets.txt", "positive"),
     ]
 
     review_files = [
-        "data/processed/neg/neg.txt",
-        "data/processed/pos/pos.txt",
+        ("data/processed/neg/neg.txt", "negative"),
+        ("data/processed/pos/pos.txt", "positive"),
     ]
-    
+
     general_corpus = []
 
-    for file in tweet_files:
+    for file, sentiment in tweet_files:
         with open(file, "r", encoding="utf-8") as f:
             corpus = f.read().split("\n")[:-1]
         
         processed_corpus = feature_extraction(corpus, remove_stopwords, apply_stemming)
-        general_corpus.extend(processed_corpus)
+        general_corpus.extend([(line, sentiment) for line in processed_corpus])
 
-    for file in review_files:
+    for file, sentiment in review_files:
         with open(file, "r", encoding="utf-8") as f:
             corpus = f.read().split("\n---------------\n")[:-1]
         
         processed_corpus = feature_extraction(corpus, remove_stopwords, apply_stemming)
-        general_corpus.extend(processed_corpus)
+        general_corpus.extend([(line, sentiment) for line in processed_corpus])
 
-    # Guardar el corpus procesado
-    with open("data/processed/general_corpus.txt", "w", encoding="utf-8") as f:
-        for line in general_corpus:
-            f.write(" ".join(line) + "\n")
+    # Crear un DataFrame y guardar el corpus procesado en un archivo CSV
+    df = pd.DataFrame(general_corpus, columns=["Text", "Sentiment"])
+    df["Text"] = df["Text"].apply(lambda x: " ".join(x))  # Convertir listas de palabras en cadenas
+
+    # borrar los indices de las filas con text < 2
+    df = df[df['Text'].str.len() > 2]
+
+    df.to_csv("data/processed/general_corpus.csv", index=False, encoding="utf-8")
+
 
 
 if __name__ == '__main__':
     feature_extraction_execution()
-    print("Procesamiento de texto final")
-    import time
-    time.sleep(20)
-    feature_extraction_execution(remove_stopwords=False, apply_stemming=False)
     print("Procesamiento de texto final")
