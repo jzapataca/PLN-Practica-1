@@ -96,14 +96,26 @@ def preprocess_reviews(file_path):
 
     preprocessed_reviews = [preprocess_strings(review) for review in reviews]
 
-    print(preprocessed_reviews[0])
+    save_path = file_path.replace("interim", "processed")
 
-# tweet_files = [
-#     "./data/interim/pos/tweets.txt",
-#     "./data/interim/neg/tweets.txt",
-# ]
+    with open(save_path, "w", encoding="utf-8") as file:
+        for review in preprocessed_reviews:
+            file.write(review + "\n---------------\n")
 
-# for path in tweet_files:
-#     preprocess_tweets(path)
+    print(f"Preprocessed file saved at {save_path}")
 
-preprocess_reviews("./data/interim/neg/neg.txt")
+tweet_files = [
+    "./data/interim/pos/tweets.txt",
+    "./data/interim/neg/tweets.txt",
+]
+
+reviews_files = [
+    "./data/interim/pos/pos.txt",
+    "./data/interim/neg/neg.txt",
+]
+
+for path in tweet_files:
+    preprocess_tweets(path)
+
+for path in reviews_files:
+    preprocess_reviews(path)
