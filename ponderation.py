@@ -54,5 +54,7 @@ def calculate_ponderation():
 
     print("Matrices y objetos vectorizer guardados exitosamente.")
 
+
+
 if __name__ == '__main__':
     calculate_ponderation()

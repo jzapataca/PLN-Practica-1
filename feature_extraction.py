@@ -133,8 +133,8 @@ def feature_extraction_execution(remove_stopwords=True, apply_stemming=True):
     df = pd.DataFrame(general_corpus, columns=["Text", "Sentiment"])
     df["Text"] = df["Text"].apply(lambda x: " ".join(x))  # Convertir listas de palabras en cadenas
 
-    # borrar los indices de las filas con text < 2
-    df = df[df['Text'].str.len() > 2]
+    # remplazar los texst con menos de 2 de longitud por "vacio"
+    df["Text"] = df["Text"].apply(lambda x: "vacio" if len(x) < 2 else x)
 
     df.to_csv("data/processed/general_corpus.csv", index=False, encoding="utf-8")
 
