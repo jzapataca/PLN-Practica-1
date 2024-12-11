@@ -9,24 +9,24 @@ import pandas as pd
 import os
 from feature_extraction import feature_extraction_execution
 
-def load_data(tfidf_path, vectorizer_path, csv_path):
+def load_data(matrix_path, vectorizer_path, csv_path):
     """
     Carga los datos necesarios para entrenar el modelo.
     """
-    tfidf_matrix = np.load(tfidf_path)
+    matrix = np.load(matrix_path)
     with open(vectorizer_path, "rb") as file:
-        tfidf_vectorizer = pickle.load(file)
+        vectorizer = pickle.load(file)
     
     df = pd.read_csv(csv_path)
     sentiments = df["Sentiment"].map({"positive": 1, "negative": 0}).values
     
-    return tfidf_matrix, sentiments
+    return matrix, sentiments
 
-def split_data(tfidf_matrix, sentiments, test_size=0.2, random_state=42):
+def split_data(matrix, sentiments, test_size=0.2, random_state=42):
     """
     Divide los datos en conjuntos de entrenamiento y prueba.
     """
-    return train_test_split(tfidf_matrix, sentiments, test_size=test_size, random_state=random_state)
+    return train_test_split(matrix, sentiments, test_size=test_size, random_state=random_state)
 
 def train_logistic_regression(X_train, y_train):
     """
@@ -76,7 +76,7 @@ def save_model(model, model_path):
 def main():
     """
     Ejecuta el proceso completo de entrenamiento y evaluación de los modelos
-    para todas las combinaciones de parámetros de preprocesamiento.
+    para todas las combinaciones de parámetros de preprocesamiento y ponderación.
     """
     # Parámetros de preprocesamiento
     parameter_combinations = [
@@ -94,39 +94,60 @@ def main():
         # Generar nuevos datos de ponderación
         feature_extraction_execution(remove_stopwords=remove_stopwords, apply_stemming=apply_stemming)
 
-        # Rutas de los archivos
+        # Evaluar para TF-IDF
+        print("\nEvaluando TF-IDF...")
         tfidf_path = "data/processed/ponderation/tfidf_matrix.npy"
-        vectorizer_path = "data/processed/ponderation/tfidf_vectorizer.pkl"
+        tfidf_vectorizer_path = "data/processed/ponderation/tfidf_vectorizer.pkl"
         csv_path = "data/processed/general_corpus.csv"
-
-        # Cargar datos
-        tfidf_matrix, sentiments = load_data(tfidf_path, vectorizer_path, csv_path)
-
-        # Dividir datos
+        tfidf_matrix, sentiments = load_data(tfidf_path, tfidf_vectorizer_path, csv_path)
         X_train, X_test, y_train, y_test = split_data(tfidf_matrix, sentiments)
 
-        # Entrenar y evaluar modelos
-        print("\nEntrenando modelo de regresión logística...")
+        print("\nEntrenando modelo de regresión logística con TF-IDF...")
         logistic_model = train_logistic_regression(X_train, y_train)
         precision, recall, f1 = evaluate_model(logistic_model, X_test, y_test)
-        save_model(logistic_model, f"models/logistic_regression_model_{remove_stopwords}_{apply_stemming}.pkl")
-        results.append(("Logistic Regression", remove_stopwords, apply_stemming, precision, recall, f1))
+        save_model(logistic_model, f"models/logistic_regression_tfidf_{remove_stopwords}_{apply_stemming}.pkl")
+        results.append(("TF-IDF", "Logistic Regression", remove_stopwords, apply_stemming, precision, recall, f1))
 
-        print("\nEntrenando modelo de K-Nearest Neighbors...")
+        print("\nEntrenando modelo de K-Nearest Neighbors con TF-IDF...")
         knn_model = train_knn(X_train, y_train)
         precision, recall, f1 = evaluate_model(knn_model, X_test, y_test)
-        save_model(knn_model, f"models/knn_model_{remove_stopwords}_{apply_stemming}.pkl")
-        results.append(("KNN", remove_stopwords, apply_stemming, precision, recall, f1))
+        save_model(knn_model, f"models/knn_tfidf_{remove_stopwords}_{apply_stemming}.pkl")
+        results.append(("TF-IDF", "KNN", remove_stopwords, apply_stemming, precision, recall, f1))
 
-        print("\nEntrenando modelo de árbol de decisión...")
+        print("\nEntrenando modelo de árbol de decisión con TF-IDF...")
         decision_tree_model = train_decision_tree(X_train, y_train)
         precision, recall, f1 = evaluate_model(decision_tree_model, X_test, y_test)
-        save_model(decision_tree_model, f"models/decision_tree_model_{remove_stopwords}_{apply_stemming}.pkl")
-        results.append(("Decision Tree", remove_stopwords, apply_stemming, precision, recall, f1))
+        save_model(decision_tree_model, f"models/decision_tree_tfidf_{remove_stopwords}_{apply_stemming}.pkl")
+        results.append(("TF-IDF", "Decision Tree", remove_stopwords, apply_stemming, precision, recall, f1))
+
+        # Evaluar para TO
+        print("\nEvaluando TO...")
+        to_path = "data/processed/ponderation/to_matrix.npy"
+        to_vectorizer_path = "data/processed/ponderation/to_vectorizer.pkl"
+        to_matrix, sentiments = load_data(to_path, to_vectorizer_path, csv_path)
+        X_train, X_test, y_train, y_test = split_data(to_matrix, sentiments)
+
+        print("\nEntrenando modelo de regresión logística con TO...")
+        logistic_model = train_logistic_regression(X_train, y_train)
+        precision, recall, f1 = evaluate_model(logistic_model, X_test, y_test)
+        save_model(logistic_model, f"models/logistic_regression_to_{remove_stopwords}_{apply_stemming}.pkl")
+        results.append(("TO", "Logistic Regression", remove_stopwords, apply_stemming, precision, recall, f1))
+
+        print("\nEntrenando modelo de K-Nearest Neighbors con TO...")
+        knn_model = train_knn(X_train, y_train)
+        precision, recall, f1 = evaluate_model(knn_model, X_test, y_test)
+        save_model(knn_model, f"models/knn_to_{remove_stopwords}_{apply_stemming}.pkl")
+        results.append(("TO", "KNN", remove_stopwords, apply_stemming, precision, recall, f1))
+
+        print("\nEntrenando modelo de árbol de decisión con TO...")
+        decision_tree_model = train_decision_tree(X_train, y_train)
+        precision, recall, f1 = evaluate_model(decision_tree_model, X_test, y_test)
+        save_model(decision_tree_model, f"models/decision_tree_to_{remove_stopwords}_{apply_stemming}.pkl")
+        results.append(("TO", "Decision Tree", remove_stopwords, apply_stemming, precision, recall, f1))
 
     # Mostrar resultados
     print("\nResultados finales:")
-    results_df = pd.DataFrame(results, columns=["Model", "Remove Stopwords", "Apply Stemming", "Precision", "Recall", "F1-Score"])
+    results_df = pd.DataFrame(results, columns=["Ponderation", "Model", "Remove Stopwords", "Apply Stemming", "Precision", "Recall", "F1-Score"])
     print(results_df)
     results_df.to_csv("models/evaluation_results.csv", index=False)
 
