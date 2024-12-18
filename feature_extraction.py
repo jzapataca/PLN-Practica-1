@@ -77,7 +77,7 @@ def apply_stemming(tokenized_corpus, language='spanish'):
     
     return stemmed_corpus
 
-def feature_extraction(corpus, if_remove_stopwords=True, if_apply_stemming=True):
+def feature_extraction(corpus, if_remove_stopwords=True, if_apply_stemming=True, language='spanish'):
     """
     Función principal que ejecuta todo el flujo de procesamiento.
     """
@@ -86,7 +86,7 @@ def feature_extraction(corpus, if_remove_stopwords=True, if_apply_stemming=True)
     
     if if_remove_stopwords:
         # Paso 2: Eliminación de stopwords
-        final_corpus = remove_stopwords(final_corpus)
+        final_corpus = remove_stopwords(final_corpus, language)
     
     # Paso 3: Eliminación de tokens con baja frecuencia
     final_corpus = remove_low_frequency_tokens(final_corpus)
@@ -119,7 +119,7 @@ def feature_extraction_execution(remove_stopwords=True, apply_stemming=True):
         with open(file, "r", encoding="utf-8") as f:
             corpus = f.read().split("\n")[:-1]
         
-        processed_corpus = feature_extraction(corpus, remove_stopwords, apply_stemming)
+        processed_corpus = feature_extraction(corpus, remove_stopwords, apply_stemming, 'english')
         general_corpus.extend([(line, sentiment) for line in processed_corpus])
 
     for file, sentiment in review_files:
